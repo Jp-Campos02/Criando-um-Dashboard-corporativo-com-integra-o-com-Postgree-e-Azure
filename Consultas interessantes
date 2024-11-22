@@ -1,0 +1,92 @@
+Consultas Interssantes que podem ser retirarados do banco de dados
+1. Top 3 empregados com os maiores salários
+SELECT Fname, Lname, Salary 
+FROM employee
+ORDER BY Salary DESC
+LIMIT 3;
+
+
+2. Total de projetos por departamento
+SELECT d.Dname AS Department, COUNT(p.Pnumber) AS ProjectCount
+FROM departament d
+LEFT JOIN project p ON d.Dnumber = p.Dnum
+GROUP BY d.Dname;
+
+
+3. Empregados que não têm dependentes
+SELECT e.Fname, e.Lname
+FROM employee e
+LEFT JOIN dependent d ON e.Ssn = d.Essn
+WHERE d.Essn IS NULL;
+
+4. Quantidade de locais por departamento
+SELECT d.Dname AS Department, COUNT(l.Dlocation) AS Locations
+FROM departament d
+JOIN dept_locations l ON d.Dnumber = l.Dnumber
+GROUP BY d.Dname;
+
+5. Aniversariantes do mês
+SELECT Fname, Lname, Bdate
+FROM employee
+WHERE EXTRACT(MONTH FROM Bdate) = EXTRACT(MONTH FROM CURRENT_DATE);
+
+6. Empregados trabalhando em projetos do departamento "Research"
+
+SELECT e.Fname, e.Lname, p.Pname AS Project
+FROM employee e
+JOIN works_on w ON e.Ssn = w.Essn
+JOIN project p ON w.Pno = p.Pnumber
+JOIN departament d ON p.Dnum = d.Dnumber
+WHERE d.Dname = 'Research';
+
+8. Lista de supervisores e seus subordinados
+SELECT s.Fname AS Supervisor, s.Lname AS SupervisorLastName, 
+       e.Fname AS Employee, e.Lname AS EmployeeLastName
+FROM employee e
+JOIN employee s ON e.Super_ssn = s.Ssn;
+
+9. Empregados contratados nos últimos 5 anos
+SELECT Fname, Lname, Bdate
+FROM employee
+WHERE Bdate >= (CURRENT_DATE - INTERVAL '5 years');
+
+10. Departamentos mais antigos
+SELECT Dname, Dept_create_date
+FROM departament
+WHERE Dept_create_date < (CURRENT_DATE - INTERVAL '20 years')
+ORDER BY Dept_create_date ASC;
+
+11. Funcionários com mais de 10 anos de empresa
+SELECT Fname, Lname, Bdate, CURRENT_DATE - Bdate AS YearsAtCompany
+FROM employee
+WHERE CURRENT_DATE - Bdate > INTERVAL '10 years';
+
+12. Média de horas trabalhadas por projeto no último mês
+SELECT p.Pname AS Project, AVG(w.Hours) AS AvgHours
+FROM works_on w
+JOIN project p ON w.Pno = p.Pnumber
+WHERE w.Hours > 0 AND w.Hours BETWEEN (CURRENT_DATE - INTERVAL '1 month') AND CURRENT_DATE
+GROUP BY p.Pname;
+
+13 . Empregados com aniversários nos próximos 30 dias
+SELECT Fname, Lname, Bdate
+FROM employee
+WHERE (EXTRACT(MONTH FROM Bdate) = EXTRACT(MONTH FROM CURRENT_DATE) AND 
+       EXTRACT(DAY FROM Bdate) >= EXTRACT(DAY FROM CURRENT_DATE))
+   OR (EXTRACT(MONTH FROM Bdate) = EXTRACT(MONTH FROM CURRENT_DATE + INTERVAL '1 month')
+       AND EXTRACT(DAY FROM Bdate) <= EXTRACT(DAY FROM CURRENT_DATE + INTERVAL '30 days'));
+
+14. Projetos em andamento por mais de 1 ano
+SELECT Pname, Plocation, Dnum, CURRENT_DATE - Dept_create_date AS ProjectDuration
+FROM project p
+JOIN departament d ON p.Dnum = d.Dnumber
+WHERE CURRENT_DATE - Dept_create_date > INTERVAL '1 year';
+
+15. Tempo médio alocado por projeto no último trimestre
+sql
+Copiar código
+SELECT p.Pname AS Project, AVG(w.Hours) AS AvgHours
+FROM works_on w
+JOIN project p ON w.Pno = p.Pnumber
+WHERE w.Hours > 0 AND w.Hours BETWEEN (CURRENT_DATE - INTERVAL '3 months') AND CURRENT_DATE
+GROUP BY p.Pname;
